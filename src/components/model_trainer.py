@@ -76,18 +76,27 @@ class ModelTrainer:
             }
 
             model_report:dict = evaluate_models(X_train, y_train, x_test, y_test, models=models, param=params)
-            best_model_score = max(sorted(model_report.values()))
-            best_model_name = list(model_report.keys())[list(model_report.values()).index(best_model_score)]
-            best_model = models[best_model_name]
+            #best_model_score = max(sorted(model_report.values()))
+            #best_model_name = list(model_report.keys())[list(model_report.values()).index(best_model_score)]
+            best_model_name, best_model_info = max(model_report.items(), key=lambda x: x[1]['score'])
+            best_model_score = model_report[best_model_name]['score']
+            best_model = model_report[best_model_name]['model']
+            #best_model_name = max(model_report, key=lambda x: model_report[x]["score"])
+            #best_model_score = model_report[best_model_name]["score"]
+            #best_model = model_report[best_model_name]["model"]
+
+
+            #best_model = models[best_model_name]
             if best_model_score < 0.6:
                 logging.info('No best model found')
                 raise CustomException('No best model found')
             logging.info('Best model found, on both training and testing dataset')
-            return(best_model_name, best_model_score)
+        
             save_object(
                 file_path = self.model_trainer_config.trained_model_file_path,
                 obj = best_model
             )
+            return(best_model_name, best_model_score)
         except Exception as e:
             logging.info('Exception occured at model training stage')
             raise CustomException(e, sys)
